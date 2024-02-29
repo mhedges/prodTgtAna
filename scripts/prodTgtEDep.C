@@ -104,19 +104,19 @@ void genCSV(TString rootfile, const int nFiles) {
     // Declare CSV files
     std::ofstream coresFile;
     coresFile.open("coresEDepWatts.csv");
-    coresFile << "x,y,z,W/mm^3,MeV/POT,uncert\n";
+    coresFile << "x,y,z,W/mm^3,uncert\n";
 
     std::ofstream finsFile;
     finsFile.open("finsEDepWatts.csv");
-    finsFile << "x,y,z,W/mm^3,MeV/POT,uncert\n";
+    finsFile << "x,y,z,W/mm^3,uncert\n";
 
     std::ofstream endRingsFile;
     endRingsFile.open("endRingsEDepWatts.csv");
-    endRingsFile << "x,y,z,W/mm^3,MeV/POT,uncert\n";
+    endRingsFile << "x,y,z,W/mm^3,uncert\n";
 
     std::ofstream supportRingFile;
     supportRingFile.open("supportRingEDepWatts.csv");
-    supportRingFile << "x,y,z,W/mm^3,MeV/POT,uncert\n";
+    supportRingFile << "x,y,z,W/mm^3,uncert\n";
 
     std::ofstream spokesFile;
     spokesFile.open("spokesEDepWatts.csv");
@@ -212,10 +212,15 @@ void genCSV(TString rootfile, const int nFiles) {
     spokesFile      << "0,0,0," << spokesEdep      * wattsFromMeV << "," << spokesEdepErr      * wattsFromMeV << "\n";
 
     // MeV / POT and errors
+    coresFile       << "x,y,z,MeV/POT,uncert\n";
     coresFile       << "0,0,0," << coresEdep       * perPOT << "," << coresEdepErr       * perPOT ;
+    finsFile        << "x,y,z,MeV/POT,uncert\n";
     finsFile        << "0,0,0," << finsEdep        * perPOT << "," << finsEdepErr        * perPOT ;
+    endRingsFile    << "x,y,z,MeV/POT,uncert\n";
     endRingsFile    << "0,0,0," << endRingsEdep    * perPOT << "," << endRingsEdepErr    * perPOT ;
+    supportRingFile << "x,y,z,MeV/POT,uncert\n";
     supportRingFile << "0,0,0," << supportRingEdep * perPOT << "," << supportRingEdepErr * perPOT ;
+    spokesFile      << "x,y,z,MeV/POT,uncert\n";
     spokesFile      << "0,0,0," << spokesEdep      * perPOT << "," << spokesEdepErr      * perPOT ;
 }
 
