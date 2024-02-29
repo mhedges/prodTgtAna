@@ -1,0 +1,8 @@
+#+title: Readme
+
+* Introduction
+This is the analysis package used for studying 8 GeV protons onto the tungsten [[mu2e.fnal.gov][Mu2e]] Production Target. Any questions,
+contact me at [[mailto:mhedges@fnal.gov][mhedges@fnal.gov]].
+
+This requires use of the [[https:://github.com/Mu2e/Offline][Mu2e Offline]] software package. This repository is not yet a standalone product and is very much
+a work in progress. As of right now, my local changes to the Offline have not been merged into the main repository.
