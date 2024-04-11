@@ -1,0 +1,5 @@
+// -*- mode: cpp -*-
+#include "Offline/Mu2eG4/geom/geom_common.txt";
+
+bool   targetPS.hasVD.backward = true;
+bool   targetPS.hasVD.forward  = true;
