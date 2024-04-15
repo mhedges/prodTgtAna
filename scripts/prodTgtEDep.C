@@ -8,7 +8,7 @@
 #include "TFile.h"
 #include "TVector3.h"
 
-void concatHists(TString outfile, const int nInputFiles){
+void concatHists(TString outfile, const int nInputFiles, std::string fpath){
 
     std::unique_ptr<TFile> fOut( TFile::Open(outfile, "RECREATE") );
 
@@ -20,9 +20,9 @@ void concatHists(TString outfile, const int nInputFiles){
     float ymin = -200.5;
     float ymax = 200.5;
 
-    int nbinsz = 240;
-    float zmin = -0.5;
-    float zmax = 240.5;
+    int nbinsz = 241;
+    float zmin = -120.5;
+    float zmax = 120.5;
 
     TH3F* hCoresHitsXYZEdep       = new TH3F ("hCoresHitsXYZEdep"      ,"Binned EDep (1mm3)",nbinsx,xmin,xmax,nbinsy,ymin,ymax,nbinsz,zmin,zmax);
     TH3F* hFinsHitsXYZEdep        = new TH3F ("hFinsHitsXYZEdep"       ,"Binned EDep (1mm3)",nbinsx,xmin,xmax,nbinsy,ymin,ymax,nbinsz,zmin,zmax);
@@ -32,7 +32,8 @@ void concatHists(TString outfile, const int nInputFiles){
 
     int nReadFiles = 0;
     std::cout << "  Analyzing " << nInputFiles << " input files:" << std::endl;
-    for (const auto& entry : std::filesystem::directory_iterator("/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/"))
+    //for (const auto& entry : std::filesystem::directory_iterator("/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/"))
+    for (const auto& entry : std::filesystem::directory_iterator(fpath))
     {
         if (nReadFiles >= nInputFiles) break;
         //TFile* fEDep = new TFile(entry.path().c_str());
@@ -82,7 +83,7 @@ void concatHists(TString outfile, const int nInputFiles){
 
         ++nReadFiles;
 
-        std::cout << "  Completed file number " << nReadFiles << std::endl;
+        std::cout << "  Completed file " << nReadFiles << std::endl;
     }
 
     fOut->WriteObject(hCoresHitsXYZEdep       ,"hCoresHitsXYZEdep"      );
@@ -92,7 +93,131 @@ void concatHists(TString outfile, const int nInputFiles){
     fOut->WriteObject(hSpokeWiresHitsXYZEdep  ,"hSpokeWiresHitsXYZEdep" );
 }
 
-void genCSV(TString rootfile, const int nFiles) {
+/*
+void rdfFillHist(TString outfile){
+    std::unique_ptr<TFile> fOut( TFile::Open(outfile, "RECREATE") );
+
+    ROOT::RDataFrame prodCoreDf("prodCore/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodStartingCoreDf("prodStartingCore/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodFinSectionDf("prodFinSection/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodStartingFinDf("prodStartingFin/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodFinTopSectionDf("prodFinTopSection/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodFinTopStartingSectionDf("prodFinTopStartingSection/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodPositiveEndRingDf("prodPositiveEndRing/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodNegativeEndRingDf("prodNegativeEndRing/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodSupportWheelDf("prodSupportWheel/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+    //ROOT::RDataFrame prodSpokeWireDf("prodSpokeWire/nt","/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.haymanFast/nts.mhedges.prodtgt.hayman01.001000_00000000.root");
+
+    //auto prodCoreCenteredDf = prodCoreDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodStartingCoreCenteredDf = prodStartingCoreDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodFinSectionCenteredDf = prodFinSectionDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodStartingFinCenteredDf = prodStartingFinDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodFinTopSectionCenteredDf = prodFinTopSectionDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodFinTopStartingSectionCenteredDf = prodFinTopStartingSectionDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodPositiveEndRingCenteredDf = prodPositiveEndRingDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodNegativeEndRingCenteredDf = prodNegativeEndRingDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodSupportWheelCenteredDf = prodSupportWheelDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+    //auto prodSpokeWireCenteredDf = prodSpokeWireDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75");
+
+    //int nbinsx = 401;
+    int nbinsx = 801;
+    float xmin = -200.5;
+    float xmax = 200.5;
+
+    //int nbinsy = 401;
+    int nbinsy = 801;
+    float ymin = -200.5;
+    float ymax = 200.5;
+
+    int nbinsz = 241;
+    //int nbinsz = 481;
+    float zmin = -120.5;
+    float zmax = 120.5;
+
+    auto hCoresHitsXYZEdep = prodCoreDf.Define("xPrime","hits.x-3904").Define("zPrime","hits.z+6164.5-2.75").Histo3D({"hCoresXYZEdep","hCoresXYZEdep",
+                             nbinsx,xmin,xmax,
+                             nbinsy,ymin,ymax,
+                             nbinsz,zmin,zmax},
+                             "hits.x","hits.y","hits.z","hits.totalEDep"
+                             );
+    //auto hStartingCoresXYZEdep = prodStartingCoreCenteredDf.Histo3D({"hStartingCoresXYZEdep","hStartingCoresXYZEdep",
+    //                             nbinsx,xmin,xmax,
+    //                             nbinsy,ymin,ymax,
+    //                             nbinsz,zmin,zmax,},
+    //                             "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                             );
+    //auto hFinsHitsXYZEdep = prodFinSectionCenteredDf.Histo3D({"hFinsXYZEdep","hFinsXYZEdep",
+    //                        nbinsx,xmin,xmax,
+    //                        nbinsy,ymin,ymax,
+    //                        nbinsz,zmin,zmax,},
+    //                        "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                        );
+    //auto hStartingFinXYZEdep = prodStartingFinCenteredDf.Histo3D({"hStartingFinXYZEdep","hStartingFinXYZEdep",
+    //                           nbinsx,xmin,xmax,
+    //                           nbinsy,ymin,ymax,
+    //                           nbinsz,zmin,zmax,},
+    //                           "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                           );
+    //auto hTopFinXYZEdep = prodFinTopSectionCenteredDf.Histo3D({"hFinTopSectionXYZEdep","hFinTopSectionXYZEdep",
+    //                      nbinsx,xmin,xmax,
+    //                      nbinsy,ymin,ymax,
+    //                      nbinsz,zmin,zmax,},
+    //                      "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                      );
+    //auto hStartingTopFinXYZEdep = prodFinTopStartingSectionCenteredDf.Histo3D({"hprodFinTopStartingSectionXYZEdep","hprodFinTopStartingSectionXYZEdep",
+    //                              nbinsx,xmin,xmax,
+    //                              nbinsy,ymin,ymax,
+    //                              nbinsz,zmin,zmax,},
+    //                              "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                              );
+    //auto hEndRingsHitsXYZEdep = prodPositiveEndRingCenteredDf.Histo3D({"hPositiveEndRingXYZEdep","hPositiveEndRingXYZEdep",
+    //                            nbinsx,xmin,xmax,
+    //                            nbinsy,ymin,ymax,
+    //                            nbinsz,zmin,zmax,},
+    //                            "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                            );
+    //auto hNegativeEndRingXYZEdep = prodPositiveEndRingCenteredDf.Histo3D({"hNegativeEndRingXYZEdep","hNegativeEndRingXYZEdep",
+    //                               nbinsx,xmin,xmax,
+    //                               nbinsy,ymin,ymax,
+    //                               nbinsz,zmin,zmax,},
+    //                               "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                               );
+    //auto hSupportRingHitsXYZEdep = prodSupportWheelCenteredDf.Histo3D({"hSupportWheelXYZEdep","hSupportWheelXYZEdep",
+    //                               nbinsx,xmin,xmax,
+    //                               nbinsy,ymin,ymax,
+    //                               nbinsz,zmin,zmax,},
+    //                               "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                               );
+    //auto hSpokeWiresHitsXYZEdep = prodSpokeWireCenteredDf.Histo3D({"hSpokeWireXYZEdep","hSpokeWireXYZEdep",
+    //                              nbinsx,xmin,xmax,
+    //                              nbinsy,ymin,ymax,
+    //                              nbinsz,zmin,zmax,},
+    //                              "xPrime","hits.y","zPrime","hits.totalEDep"
+    //                              );
+
+    //hCoresHitsXYZEdep->Add(hStartingCoresXYZEdep);
+
+    //hFinsHitsXYZEdep->Add(hStartingFinXYZEdep);
+    //hFinsHitsXYZEdep->Add(hTopFinXYZEdep);
+    //hFinsHitsXYZEdep->Add(hStartingTopFinXYZEdep);
+
+    //hEndRingsHitsXYZEdep->Add(hNegativeEndRingXYZEdep);
+
+    //hCoresHitsXYZEdep->Draw();
+    hCoresHitsXYZEdep->Write();
+    //hFinsHitsXYZEdep->Write();
+    //hEndRingsHitsXYZEdep->Write();
+    //hSupportRingHitsXYZEdep->Write();
+    //hSpokeWiresHitsXYZEdep->Write();
+    //fOut->WriteObject(hCoresHitsXYZEdep       ,"hCoresHitsXYZEdep"      );
+    //fOut->WriteObject(hFinsHitsXYZEdep        ,"hFinsHitsXYZEdep"       );
+    //fOut->WriteObject(hEndRingsHitsXYZEdep    ,"hEndRingsHitsXYZEdep"   );
+    //fOut->WriteObject(hSupportRingHitsXYZEdep ,"hSupportRingHitsXYZEdep");
+    //fOut->WriteObject(hSpokeWiresHitsXYZEdep  ,"hSpokeWiresHitsXYZEdep" );
+}
+*/
+
+void genCSV(TString rootfile, const int nFiles, std::string csvPath) {
     std::unique_ptr<TFile> infile( TFile::Open(rootfile) );
 
     TH3F* hCoresHitsXYZEdep       = (TH3F*)infile->Get("hCoresHitsXYZEdep"       );
@@ -103,24 +228,24 @@ void genCSV(TString rootfile, const int nFiles) {
 
     // Declare CSV files
     std::ofstream coresFile;
-    coresFile.open("coresEDepWatts.csv");
-    coresFile << "x,y,z,W/mm^3,uncert\n";
+    coresFile.open(csvPath+"coresEDepMeVperPOT.csv");
+    coresFile << "x,y,z,MeV/POT,uncert\n";
 
     std::ofstream finsFile;
-    finsFile.open("finsEDepWatts.csv");
-    finsFile << "x,y,z,W/mm^3,uncert\n";
+    finsFile.open(csvPath+"finsEDepMeVperPOT.csv");
+    finsFile << "x,y,z,MeV/POT,uncert\n";
 
     std::ofstream endRingsFile;
-    endRingsFile.open("endRingsEDepWatts.csv");
-    endRingsFile << "x,y,z,W/mm^3,uncert\n";
+    endRingsFile.open(csvPath+"endRingsEDepMeVperPOT.csv");
+    endRingsFile << "x,y,z,MeV/POT,uncert\n";
 
     std::ofstream supportRingFile;
-    supportRingFile.open("supportRingEDepWatts.csv");
-    supportRingFile << "x,y,z,W/mm^3,uncert\n";
+    supportRingFile.open(csvPath+"supportRingEDepMeVperPOT.csv");
+    supportRingFile << "x,y,z,MeV/POT,uncert\n";
 
     std::ofstream spokesFile;
-    spokesFile.open("spokesEDepWatts.csv");
-    spokesFile << "x,y,z,W/mm^3,MeV/POT,uncert\n";
+    spokesFile.open(csvPath+"spokesEDepMeVperPOT.csv");
+    spokesFile << "x,y,z,MeV/POT,uncert\n";
 
     std::cout << "  Writing CSV files for cores, fins, endRings, supportRing, and spokes..." << std::endl;
 
@@ -135,12 +260,15 @@ void genCSV(TString rootfile, const int nFiles) {
 
     Double_t coresEdep,       coresEdepErr;
     Double_t finsEdep,        finsEdepErr;
-    Double_t endRingsEdep,     endRingsEdepErr;
+    Double_t endRingsEdep,    endRingsEdepErr;
     Double_t supportRingEdep, supportRingEdepErr;
     Double_t spokesEdep,      spokesEdepErr;
 
-    float perPOT = 1. / (nFiles * 1000); // 1e3 POT per file
-    float wattsFromMeV = 1e6*perPOT * 3.9e7/1.695*1.6e-19*1e6; // Instantaneous power / pulse: (1e6 eV/MeV) / (# POT) * (3.9e7 POT /1.6 us) * (1.6e-19 J/eV) * (1e6 us/s)
+    float perPOT = 1. / (nFiles * 100); // 1e3 POT per file
+    //float wattsFromMeV = 1e6*perPOT * 3.9e7/1.695*1.6e-19*1e6; // Instantaneous power / pulse: (1e6 eV/MeV) / (# POT) * (3.9e7 POT /1.6 us) * (1.6e-19 J/eV) * (1e6 us/s)
+    //float wattsFromMeV = 1e6*perPOT * 8e12/0.380*1.6e-19; // Instantaneous power / MI cycle (on-spill): (1e6 eV/MeV) / (# POT) * (8e12 POT /0.380 s) * (1.6e-19 J/eV)
+
+    float wattsFromMeV = perPOT; // MeV / POT
 
     TVector3 testVec;
     for (binz=firstz;binz<=lastz;binz++) {
@@ -165,31 +293,23 @@ void genCSV(TString rootfile, const int nFiles) {
 
                 spokesEdep         = hSpokeWiresHitsXYZEdep->GetBinContent(bin) * wattsFromMeV;
                 spokesEdepErr      = hSpokeWiresHitsXYZEdep->GetBinError(bin) * wattsFromMeV;
+                testVec.SetXYZ(x,y,z);
+                //testVec.RotateY(180.*TMath::Pi());
+                //testVec.RotateY(14.*TMath::DegToRad());
                 if (coresEdep>0) {
-                    testVec.SetXYZ(x,y,-(z-110));
-                    testVec.RotateY(14.*TMath::DegToRad());
-                    coresFile << testVec.X() << "," << testVec.Y() << "," << testVec.Z() << "," << coresEdep << "," << coresEdepErr << "\n";
-                    //std::cout<<"Bin number, x, y, z and edep: "<<bin<<" "<<testVec.X()<<" "<<testVec.Y()<<" "<<testVec.Z()<<" "<<edep<<std::endl;
+                    coresFile << -testVec.X() << "," << testVec.Y() << "," << -testVec.Z() << "," << coresEdep << "," << coresEdepErr << "\n";
                 }
                 if (finsEdep>0) {
-                    testVec.SetXYZ(x,y,-(z-110));
-                    testVec.RotateY(14.*TMath::DegToRad());
-                    finsFile << testVec.X() << "," << testVec.Y() << "," << testVec.Z() << "," << finsEdep << "," << finsEdepErr << "\n";
+                    finsFile << -testVec.X() << "," << testVec.Y() << "," << -testVec.Z() << "," << finsEdep << "," << finsEdepErr << "\n";
                 }
                 if (endRingsEdep>0) {
-                    testVec.SetXYZ(x,y,-(z-110));
-                    testVec.RotateY(14.*TMath::DegToRad());
-                    endRingsFile << testVec.X() << "," << testVec.Y() << "," << testVec.Z() << "," << endRingsEdep << "," << endRingsEdepErr << "\n";
+                    endRingsFile << -testVec.X() << "," << testVec.Y() << "," << -testVec.Z() << "," << endRingsEdep << "," << endRingsEdepErr << "\n";
                 }
                 if (supportRingEdep>0) {
-                    testVec.SetXYZ(x,y,-(z-110));
-                    testVec.RotateY(14.*TMath::DegToRad());
-                    supportRingFile << testVec.X() << "," << testVec.Y() << "," << testVec.Z() << "," << supportRingEdep << "," << supportRingEdepErr << "\n";
+                    supportRingFile << -testVec.X() << "," << testVec.Y() << "," << -testVec.Z() << "," << supportRingEdep << "," << supportRingEdepErr << "\n";
                 }
                 if (spokesEdep>0) {
-                    testVec.SetXYZ(x,y,-(z-110));
-                    testVec.RotateY(14.*TMath::DegToRad());
-                    spokesFile << testVec.X() << "," << testVec.Y() << "," << testVec.Z() << "," << spokesEdep << "," << spokesEdepErr << "\n";
+                    spokesFile << -testVec.X() << "," << testVec.Y() << "," << -testVec.Z() << "," << spokesEdep << "," << spokesEdepErr << "\n";
                 }
             }
         }
@@ -204,12 +324,17 @@ void genCSV(TString rootfile, const int nFiles) {
     supportRingEdep = hSupportRingHitsXYZEdep->IntegralAndError(-1,1000,-1,1000,-1,1000,supportRingEdepErr);
     spokesEdep      = hSpokeWiresHitsXYZEdep ->IntegralAndError(-1,1000,-1,1000,-1,1000,spokesEdepErr);
 
-    // Watts and errors
-    coresFile       << "0,0,0," << coresEdep       * wattsFromMeV << "," << coresEdepErr       * wattsFromMeV << "\n";
-    finsFile        << "0,0,0," << finsEdep        * wattsFromMeV << "," << finsEdepErr        * wattsFromMeV << "\n";
-    endRingsFile    << "0,0,0," << endRingsEdep    * wattsFromMeV << "," << endRingsEdepErr    * wattsFromMeV << "\n";
-    supportRingFile << "0,0,0," << supportRingEdep * wattsFromMeV << "," << supportRingEdepErr * wattsFromMeV << "\n";
-    spokesFile      << "0,0,0," << spokesEdep      * wattsFromMeV << "," << spokesEdepErr      * wattsFromMeV << "\n";
+    //// Watts and errors
+    //coresFile       << "x,y,z,Watts,uncert\n";
+    //coresFile       << "0,0,0," << coresEdep       * wattsFromMeV << "," << coresEdepErr       * wattsFromMeV << "\n";
+    //finsFile        << "x,y,z,Watts,uncert\n";
+    //finsFile        << "0,0,0," << finsEdep        * wattsFromMeV << "," << finsEdepErr        * wattsFromMeV << "\n";
+    //endRingsFile    << "x,y,z,Watts,uncert\n";
+    //endRingsFile    << "0,0,0," << endRingsEdep    * wattsFromMeV << "," << endRingsEdepErr    * wattsFromMeV << "\n";
+    //supportRingFile << "x,y,z,Watts,uncert\n";
+    //supportRingFile << "0,0,0," << supportRingEdep * wattsFromMeV << "," << supportRingEdepErr * wattsFromMeV << "\n";
+    //spokesFile      << "x,y,z,Watts,uncert\n";
+    //spokesFile      << "0,0,0," << spokesEdep      * wattsFromMeV << "," << spokesEdepErr      * wattsFromMeV << "\n";
 
     // MeV / POT and errors
     coresFile       << "x,y,z,MeV/POT,uncert\n";
@@ -225,8 +350,20 @@ void genCSV(TString rootfile, const int nFiles) {
 }
 
 void prodTgtEDep(){
-    TString rootfile = "xyzEdepHists.root";
-    const int nFiles = 100;
-    //concatHists(rootfile,nFiles);
-    genCSV(rootfile,nFiles);
+
+    //rdfFillHist(rootfile);
+    //rdfFillHist(rootfile,fpath);
+
+    //const int nFiles = 100;
+    //std::string fpath = "/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.hayman.0010000/";
+    //TString rootfile = "results/prodtgt.hayman.0010000.xyzEdepHists.root";
+    //std::string csvPath = "results/csv/hayman.0010000/hayman.0010000.";
+
+    const int nFiles = 1000;
+    std::string fpath = "/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.grayman.0010000/";
+    TString rootfile = "prodtgt.grayman.0010000.xyzEdepHists.root";
+    std::string csvPath = "csv/grayman.0010000/grayman.0010000.";
+
+    //concatHists(rootfile,nFiles,fpath);
+    genCSV(rootfile,nFiles,csvPath);
 }
