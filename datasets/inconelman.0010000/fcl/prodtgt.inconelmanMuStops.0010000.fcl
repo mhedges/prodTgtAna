@@ -1,0 +1,10 @@
+# This job starts with the validation script that runs POT and counts
+# mu- stops. Only changes are file names for book-keeping
+# Michael Hedges 2024
+
+#include "Production/JobConfig/validation/stoppedMuonsSingleStage.fcl"
+
+outputs.tgtStopOutput.fileName    : "sim.owner.prodtgt.version.sequencer.art"
+
+services.GeometryService.inputFile : "prodTgtAna/datasets/inconelman.0010000/geom/geom_inconelman.txt"
+services.TFileService.fileName : "nts.owner.prodtgt.version.sequencer.root"

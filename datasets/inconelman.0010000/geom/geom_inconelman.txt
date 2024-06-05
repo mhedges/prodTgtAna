@@ -1,0 +1,11 @@
+// -*- mode: cpp -*-
+#include "Offline/Mu2eG4/geom/geom_common.txt";
+
+bool   targetPS.hasVD.backward = true;
+bool   targetPS.hasVD.forward  = true;
+
+string targetPS_targetCoreMaterial         = "Inconel600";
+string targetPS_targetFinMaterial          = "Inconel600";
+string targetPS_supportRingMaterial        = "Inconel600";
+string targetPS_spokeMaterial              = "Inconel600";
+string targetPS.supports.spokes.material   = "Inconel600";

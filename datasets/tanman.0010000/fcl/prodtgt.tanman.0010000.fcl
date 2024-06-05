@@ -1,0 +1,203 @@
+# -*- mode: tcl -*-
+# Script to shoot beam protons onto the production target and dump
+# TTrees of StepPointMCs at various points and histograms into a root file.
+#
+#include "Offline/fcl/standardServices.fcl"
+#include "Offline/EventGenerator/fcl/prolog.fcl"
+#include "Production/JobConfig/common/prolog.fcl"
+#include "Production/JobConfig/beam/prolog.fcl"
+process_name :  haymanStudy
+
+source : {
+  module_type : EmptyEvent
+  maxEvents : @nil
+}
+
+services : @local::Services.Sim
+
+#//services.GeometryService.inputFile : "prodTgtAna/geom/geom_hayman_with_vds.txt"
+
+physics : {
+  # setup the modules
+  producers: {
+    @table::Common.producers
+    generate: @local::PrimaryProtonGun
+    compressPVBeam : @local::Beam.producers.compressPVBeam
+    compressPVNeutrals : @local::Beam.producers.compressPVNeutrals
+  }
+  filters: {
+    @table::Common.filters
+    BeamFilter : @local::Beam.filters.BeamFilter
+    #NeutralsFilter : @local::Beam.filters.NeutralsFilter
+  }
+  analyzers : {
+      @table::Common.analyzers
+      genCountLogger: {
+          module_type: GenEventCountReader
+      }
+      prodCore: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetCoreSection"
+      }
+      prodStartingCore: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetStartingCoreSection"
+      }
+      prodStartingFin: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetFinStartingSection"
+      }
+      prodFinSection: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetFinSection"
+      }
+      prodFinTopSection: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetFinTopSection"
+      }
+      prodFinTopStartingSection: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetFinTopStartingSection"
+      }
+      prodPositiveEndRing: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetPositiveEndRing"
+      }
+      prodNegativeEndRing: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetNegativeEndRing"
+      }
+      prodSupportWheel: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetSupportWheel"
+      }
+      prodSpokeWire: {
+        module_type: PrimaryProtonEnergyDumper TimeOffsets: {}
+        hitsInputTag: "g4run:ProductionTargetSpokeWire"
+      }
+  }
+  #analyzers : @local::Common.analyzers
+  # setup the paths
+  #BeamPath : [ @sequence::Common.generateSequence, @sequence::Common.g4Sequence, BeamFilter, compressPVBeam]
+  #NeutralsPath : [ @sequence::Common.generateSequence, @sequence::Common.g4Sequence, NeutralsFilter, compressPVNeutrals]
+  #trigger_paths  : [BeamPath, NeutralsPath ]
+  #OutputPath : [BeamOutput, NeutralsOutput ]
+  BeamPath : [ @sequence::Common.generateSequence, @sequence::Common.g4Sequence, BeamFilter]
+  trigger_paths  : [BeamPath]
+  LogPath : [ genCountLogger ]
+  OutputPath : [BeamOutput]
+  e1 : [ prodCore,
+         prodStartingCore,
+         prodStartingFin,
+         prodFinSection,
+         prodFinTopSection,
+         prodFinTopStartingSection,
+         prodPositiveEndRing,
+         prodNegativeEndRing,
+         prodSupportWheel,
+         prodSpokeWire
+        ]
+  end_paths: [OutputPath, LogPath, e1 ]
+  #end_paths : [ e1 ]
+
+}
+physics.filters.BeamFilter.mainHitInputs : ["g4run:ProductionTargetCoreSection"]
+## setup outputs
+outputs: {
+  BeamOutput : {
+    module_type: RootOutput
+    SelectEvents: ["BeamPath"]
+    outputCommands:   [ "drop *_*_*_*",
+      @sequence::Beam.SimKeptProducts,
+      "keep *_BeamFilter_*_*"
+      #//"keep *_compressPVBeam_*_*"
+    ]
+    fileName : "sim.owner.prodTgt.version.sequencer.art"
+  }
+  prodCoreOutput : {
+    module_type: RootOutput
+    SelectedEvents: ["e1"]
+    fileName : "hayman.art"
+  }
+}
+
+
+#physics.producers.g4run.Mu2eG4CommonCut: {}
+#physics.producers.g4run.Mu2eG4CommonCut: {
+#    type: notPdgId pars: [
+#                          2212, -2212,
+#                          211, -211,
+#                          2112, -2112,
+#                          11, -11,
+#                          22,
+#                          111
+#                         ]
+#
+#}
+
+#physics.producers.g4run.Mu2eG4CommonCut: {
+#    # // type: inVolume pars: [PSVacuum] #// This works! (210s per 100 evts)
+#    # //type: inVolume pars: [VirtualDetector_PT_Back] #// Slower (280s per 100 evts)
+#    type: notInVolume pars: [ProductionTargetMother] #// This stops protons immediately at first face of ProdTgt
+#    write: Beam
+#}
+
+# /// Working!
+#physics.producers.g4run.Mu2eG4CommonCut: {
+#    type: intersection
+#    pars: [
+#             { type: inVolume pars: [ PSVacuum ] },
+#             { type: notInVolume pars: [ProductionTargetMother] }
+#             ]
+#    write: Beam
+#}
+
+physics.producers.g4run.Mu2eG4CommonCut: {
+    type: union
+    pars : [
+             { type: intersection
+               pars: [
+                      { type: inVolume pars: [ PSVacuum ] },
+                      { type: notInVolume pars: [ProductionTargetMother] }
+                     ]
+               write: Beam },
+             //@local::mu2eg4CutDeltaElectrons,
+             @local::mu2eg4CutNeutrinos
+             //{ type: pdgId pars: [
+             //                    2112, -2112
+             //                   ]
+             //}
+           ]
+}
+
+# tweak Mu2eG4 settings
+physics.producers.g4run.SDConfig.enableSD: [
+                                             virtualdetector,
+                                             ProductionTargetCoreSection,
+                                             ProductionTargetStartingCoreSection,
+                                             ProductionTargetFinStartingSection,
+                                             ProductionTargetNegativeEndRing,
+                                             ProductionTargetPositiveEndRing,
+                                             ProductionTargetFinSection,
+                                             ProductionTargetFinTopSection,
+                                             ProductionTargetFinTopStartingSection,
+                                             ProductionTargetSupportWheel,
+                                             ProductionTargetSpokeWire
+                                            ]
+
+physics.producers.g4run.physics.minRangeCut : 0.001 #// (mm)
+physics.producers.g4run.physics.bfieldMaxStep : 0.01 # fine range (mm)
+physics.producers.g4run.physics.limitStepInAllVolumes : true
+physics.producers.g4run.physics.protonProductionCut : 0.0 # fine tracking to get accurate eDep
+
+#include "Production/JobConfig/common/MT.fcl"
+#include "Production/JobConfig/beam/epilog.fcl"
+#include "Production/JobConfig/common/epilog.fcl"
+services.GeometryService.bFieldFile : "Offline/Mu2eG4/geom/bfgeom_no_ds_v01.txt"
+# the following is overwritten by generate_fcl
+services.SeedService.baseSeed          : @local::Common.BaseSeed
+
+services.TFileService.fileName : "nts.owner.prodtgt.version.sequencer.root"
+
+# MT settings
+#services.scheduler.num_threads : 1 #// This apparently doesn't do anything...?
