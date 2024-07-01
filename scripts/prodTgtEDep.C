@@ -264,7 +264,7 @@ void genCSV(TString rootfile, const int nFiles, std::string csvPath) {
     Double_t supportRingEdep, supportRingEdepErr;
     Double_t spokesEdep,      spokesEdepErr;
 
-    float perPOT = 1. / (nFiles * 100); // 1e3 POT per file
+    float perPOT = 1. / (nFiles * 1000); // 1e3 POT per file
     //float wattsFromMeV = 1e6*perPOT * 3.9e7/1.695*1.6e-19*1e6; // Instantaneous power / pulse: (1e6 eV/MeV) / (# POT) * (3.9e7 POT /1.6 us) * (1.6e-19 J/eV) * (1e6 us/s)
     //float wattsFromMeV = 1e6*perPOT * 8e12/0.380*1.6e-19; // Instantaneous power / MI cycle (on-spill): (1e6 eV/MeV) / (# POT) * (8e12 POT /0.380 s) * (1.6e-19 J/eV)
 
@@ -354,16 +354,16 @@ void prodTgtEDep(){
     //rdfFillHist(rootfile);
     //rdfFillHist(rootfile,fpath);
 
-    //const int nFiles = 100;
+    const int nFiles = 100;
+
     //std::string fpath = "/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.hayman.0010000/";
     //TString rootfile = "results/prodtgt.hayman.0010000.xyzEdepHists.root";
     //std::string csvPath = "results/csv/hayman.0010000/hayman.0010000.";
 
-    const int nFiles = 1000;
     std::string fpath = "/exp/mu2e/data/users/mhedges/projects/prodtgt/prodtgt.grayman.0010000/";
     TString rootfile = "prodtgt.grayman.0010000.xyzEdepHists.root";
     std::string csvPath = "csv/grayman.0010000/grayman.0010000.";
 
-    //concatHists(rootfile,nFiles,fpath);
+    concatHists(rootfile,nFiles,fpath);
     genCSV(rootfile,nFiles,csvPath);
 }
