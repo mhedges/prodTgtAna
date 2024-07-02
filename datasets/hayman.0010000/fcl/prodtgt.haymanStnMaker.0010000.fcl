@@ -1,0 +1,10 @@
+# -*- mode:tcl -*-
+# This job starts with the Stntuple FCL that converts mu- stops
+# in the stopping   target into an stn file. Only changes are file
+# names for book-keeping
+# Michael Hedges 2024
+
+#include "prodTgtAna/fcl/stn/s3_tgtstops_stn.fcl"
+
+services.TFileService.fileName              : "nts.owner.prodtgt.version.sequencer.root"
+physics.analyzers.InitStntuple.histFileName : "nts.owner.project.version.sequencer.stn"
